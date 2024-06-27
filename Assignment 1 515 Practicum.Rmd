@@ -1,0 +1,113 @@
+---
+title: 'ANA 515 P assignment 1  '
+author: "Chester Kayonga"
+date: "2024-06-21"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+title: "2020 NFL Predictions Analysis"
+author: "Your Name"
+date: "2024-06-21"
+output: html_document
+---
+
+##A Description of the Data
+
+The dataset I am working with contains game-by-game Elo ratings for the 2020 NFL season. This data IS from two sheets in an Excel workbook that we will combine into one. Our analysis aims to clean and explore the data, identify any errors, and produce visualizations to aid in understanding the data.
+
+##Read the Data into R
+
+```{r, include=FALSE}
+# Load necessary libraries
+library(readxl)
+library(tidyverse)
+```
+
+```{r, include=FALSE}
+# Read data from the Excel file
+my_sheet1 <- read_excel("nfl_elo_latest (1).xlsx", sheet = "Sheet 1")
+my_sheet2 <- read_excel("nfl_elo_latest (1).xlsx", sheet = "Sheet1")
+```
+
+##Combining Datafiles
+```{r, include=FALSE}
+# Combine the data from the two sheets
+combined_data <- rbind(my_sheet1, my_sheet2)
+```
+##Cleaning the Data
+##Data Inspection
+```{r, echo=TRUE}
+# Display the first few rows of the combined dataset
+head(combined_data)
+
+# Check for any missing values
+missing_values <- sum(is.na(combined_data))
+missing_values
+```
+
+##Handling Missing values
+
+```{r, echo=TRUE}
+# Identify columns with missing values
+cols_with_na <- colnames(combined_data)[apply(combined_data, 2, anyNA)]
+cols_with_na
+
+# Impute missing values or remove rows/columns with missing values
+# For simplicity, we will remove the rows with missing values
+cleaned_data <- combined_data %>% drop_na()
+
+# Verify that there are no missing values left
+sum(is.na(cleaned_data))
+
+```
+##Taking care of Duplicates 
+```{r echo=TRUE}
+# Identify potential duplicate rows
+duplicates <- combined_data[duplicated(combined_data), ]
+duplicates
+
+# Remove duplicate rows
+cleaned_data <- cleaned_data %>% distinct()
+
+# Display the first few rows of the cleaned dataset
+head(cleaned_data)
+```
+##Ensuring 'elo_pre is Numeric
+
+```{r include=FALSE}
+# Convert the elo1_pre column to numeric
+cleaned_data$elo1_pre <- as.numeric(cleaned_data$elo1_pre)
+
+# Check for any NA values introduced during conversion
+sum(is.na(cleaned_data$elo1_pre))
+```
+##Data visualization
+##Histogram of Elo Ratings
+```{r echo=TRUE}
+# Create a histogram of Elo ratings (using 'elo1_pre' column)
+ggplot(cleaned_data, aes(x = elo1_pre)) +
+  geom_histogram(binwidth = 50, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of Elo Ratings",
+       x = "Elo Rating",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+##Scatter Plot of Elo Ratings vs. Probability
+```{r echo=TRUE}
+# Create a scatter plot of Elo ratings vs. probability of winning (using 'elo1_pre' and 'elo_prob1' columns)
+ggplot(cleaned_data, aes(x = elo1_pre, y = elo_prob1)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Scatter Plot of Elo Ratings vs. Probability of Winning",
+       x = "Elo Rating",
+       y = "Probability of Winning") +
+  theme_minimal()
+```
+
